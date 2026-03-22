@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>認証中...</title>
+</head>
+<body>
+    <h2>認証処理中です。この画面を閉じないでください...</h2>
+    <p id="status">ステータス: コード取得中...</p>
+
+    <script>
+        // 1. URLから "code" パラメータを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const statusElement = document.getElementById('status');
+
+        if (code) {
+            statusElement.innerText = "ステータス: サーバーへ送信中...";
+
+            // 2. 自分のBotサーバー（API）へコードを送信
+            // YOUR_BOT_SERVER_URL は、お使いのVPSのIPやドメインに置き換えてください
+            fetch('https://YOUR_BOT_SERVER_URL/callback?code=' + code)
+                .then(response => {
+                    if (response.ok) {
+                        statusElement.innerText = "認証に成功しました！このタブを閉じてDiscordに戻ってください。";
+                    } else {
+                        statusElement.innerText = "エラー: サーバー側で認証に失敗しました。";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusElement.innerText = "エラー: サーバーに接続できませんでした。";
+                });
+        } else {
+            statusElement.innerText = "エラー: 認証コードが見つかりません。";
+        }
+    </script>
+</body>
+</html>
