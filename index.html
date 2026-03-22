@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暇人の集まり | 公式認証システム</title>
+    <!-- Google Fonts for professional look -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #23272a;
+            --card-bg: #2f3136;
+            --blurple: #5865F2;
+            --success: #43b581;
+            --error: #f04747;
+            --text-main: #ffffff;
+            --text-muted: #b9bbbe;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transition: transform 0.3s ease;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: var(--blurple);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(88, 101, 242, 0.4);
+        }
+
+        h1 { font-size: 22px; margin: 10px 0; letter-spacing: 1px; }
+        p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: var(--blurple);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+            margin: 20px 0;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #status-icon { font-size: 48px; margin: 20px 0; display: none; }
+        .success-text { color: var(--success); font-weight: bold; }
+        .error-text { color: var(--error); font-weight: bold; }
+
+        footer {
+            margin-top: 30px;
+            font-size: 10px;
+            color: #72767d;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-card">
+        <div class="logo">暇</div>
+        <h1 id="title">認証処理中...</h1>
+        
+        <div id="loader" class="loader"></div>
+        <div id="status-icon"></div>
+
+        <p id="description">
+            「暇人の集まり」公式ボットが<br>
+            あなたの情報を安全に確認しています。
+        </p>
+
+        <footer>Powered by SHIZK Debug System</footer>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
+        const title = document.getElementById('title');
+        const description = document.getElementById('description');
+        const loader = document.getElementById('loader');
+        const statusIcon = document.getElementById('status-icon');
+
+        // ※ここにあなたのBotが動いているサーバーのURLを入れてください
+        const BACKEND_URL = 'https://YOUR_SERVER_ADDRESS/callback';
+
+        if (code) {
+            fetch(`${BACKEND_URL}?code=${code}`)
+                .then(response => {
+                    if (response.ok) {
+                        showStatus(true, "認証に成功しました", "このタブを閉じてDiscordに戻ってください。<br><span class='success-text'>サーバーへの入室が許可されました。</span>");
+                    } else {
+                        throw new Error("Auth Failed");
+                    }
+                })
+                .catch(err => {
+                    showStatus(false, "認証エラー", "サーバーとの通信に失敗しました。<br><span class='error-text'>時間を置いて再度お試しください。</span>");
+                });
+        } else {
+            showStatus(false, "無効なリクエスト", "認証コードが確認できませんでした。<br>Discordから再度やり直してください。");
+        }
+
+        function showStatus(isSuccess, titleText, descText) {
+            loader.style.display = "none";
+            statusIcon.style.display = "block";
+            statusIcon.innerText = isSuccess ? "✅" : "❌";
+            title.innerText = titleText;
+            description.innerHTML = descText;
+        }
+    </script>
+</body>
+</html>
